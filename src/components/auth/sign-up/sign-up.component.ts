@@ -17,6 +17,7 @@ export class SignUpComponent {
 
   constructor(
     private formBuilder: FormBuilder,
+    
     private authService: AuthService,
     private router: Router
   ) {

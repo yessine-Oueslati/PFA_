@@ -1,0 +1,28 @@
+<div class="auth-container">
+  <div class="auth-header">
+    <div class="logo-section">
+      <h1 class="company-name">Ooredoo</h1>
+      <p class="company-tagline">Enterprise Services</p>
+    </div>
+  </div>
+
+  <div class="auth-card">
+    <div class="card-header">
+      <h2 class="card-title">
+        {{ isSignUpMode ? 'Create Account' : 'Sign-In to your account' }}
+      </h2>
+    </div>
+
+    <app-sign-in *ngIf="!isSignUpMode"></app-sign-in>
+    <app-sign-up *ngIf="isSignUpMode"></app-sign-up>
+
+    <div class="card-footer">
+      <p class="toggle-text">
+        {{ isSignUpMode ? 'Already have an account?' : "Don't have an account?" }}
+        <button type="button" class="toggle-button" (click)="toggleMode()">
+          {{ isSignUpMode ? 'Sign In' : 'Sign Up' }}
+        </button>
+      </p>
+    </div>
+  </div>
+</div>

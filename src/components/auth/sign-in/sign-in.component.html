@@ -1,0 +1,36 @@
+<form [formGroup]="signInForm" (ngSubmit)="onSignIn()" class="auth-form">
+  <div class="form-group">
+    <label for="signin-email" class="form-label">Email Address</label>
+    <input
+      id="signin-email"
+      type="email"
+      formControlName="email"
+      class="form-input"
+      placeholder="Enter your email address"
+      autocomplete="email"
+    >
+    <div *ngIf="signInForm.get('email')?.invalid && signInForm.get('email')?.touched" class="error-message">Email is required</div>
+  </div>
+  <div class="form-group">
+    <label for="signin-password" class="form-label">Password</label>
+    <input
+      id="signin-password"
+      type="password"
+      formControlName="password"
+      class="form-input"
+      placeholder="Enter your password"
+      autocomplete="current-password"
+    >
+    <div *ngIf="signInForm.get('password')?.invalid && signInForm.get('password')?.touched" class="error-message">Password is required</div>
+  </div>
+  <button
+    type="submit" 
+    class="submit-button" [disabled]=" signInForm.invalid || signInForm.get('password')?.invalid || signInForm.get('email')?.invalid "
+  >
+    Sign In
+  </button>
+  <p class="sucess-message" *ngIf='submited'>
+    <span class="icon">✓</span>
+    <span>Account created successfully</span>
+  </p>
+</form> 

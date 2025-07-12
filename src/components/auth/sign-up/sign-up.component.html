@@ -1,0 +1,104 @@
+<form [formGroup]="signUpForm" (ngSubmit)="onSignUp()" class="auth-form">
+  <div class="form-row">
+    <div class="form-group half-width">
+      <label for="signup-firstName" class="form-label">First Name</label>
+      <input
+        id="signup-firstName"
+        type="text"
+        formControlName="firstName"
+        class="form-input"
+        placeholder="First name"
+        autocomplete="given-name"
+      >
+      <div *ngIf="signUpForm.get('firstName')?.invalid && signUpForm.get('firstName')?.touched" class="error-message">First name is required</div>
+    </div>
+    <div class="form-group half-width">
+      <label for="signup-lastName" class="form-label">Last Name</label>
+      <input
+        id="signup-lastName"
+        type="text"
+        formControlName="lastName"
+        class="form-input"
+        placeholder="Last name"
+        autocomplete="family-name"
+      >
+      <div *ngIf="signUpForm.get('lastName')?.invalid && signUpForm.get('lastName')?.touched" class="error-message">Last name is required</div>
+    </div>
+  </div>
+  <div class="form-group">
+    <label for="signup-email" class="form-label">Email Address</label>
+    <input
+      id="signup-email"
+      type="email"
+      formControlName="email"
+      class="form-input"
+      placeholder="Enter your email address"
+      autocomplete="email"
+    >
+    <div *ngIf="signUpForm.get('email')?.invalid && signUpForm.get('email')?.touched" class="error-message">Email is required</div>
+  </div>
+  <div class="form-group">
+    <label for="signup-company" class="form-label">Company Name</label>
+    <input
+      id="signup-company"
+      type="text"
+      formControlName="companyName"
+      class="form-input"
+      placeholder="Enter your company name"
+      autocomplete="organization"
+    >
+    <div *ngIf="signUpForm.get('companyName')?.invalid && signUpForm.get('companyName')?.touched" class="error-message">Company name is required</div>
+  </div>
+  <div class="form-group">
+    <label for="signup-phone" class="form-label">Phone Number</label>
+    <input
+      id="signup-phone"
+      type="tel"
+      formControlName="phoneNumber"
+      class="form-input"
+      placeholder="Enter your phone number"
+      autocomplete="tel"
+    >
+    <div *ngIf="signUpForm.get('phoneNumber')?.invalid && signUpForm.get('phoneNumber')?.touched" class="error-message">Phone number is required</div>
+  </div>
+  <div class="form-row">
+    <div class="form-group half-width">
+      <label for="signup-password" class="form-label">Password</label>
+      <input
+        id="signup-password"
+        type="password"
+        formControlName="password"
+        class="form-input"
+        placeholder="Create password"
+        autocomplete="new-password"
+      >
+      <div *ngIf="signUpForm.get('password')?.invalid && signUpForm.get('password')?.touched" class="error-message">Password is required</div>
+    </div>
+    <div class="form-group half-width">
+      <label class="form-label">Confirm Password</label>
+      <input
+        id="signup-confirmPassword"
+        type="password"
+        formControlName="confirmPassword"
+        class="form-input"
+        placeholder="Confirm password"
+        autocomplete="new-password"
+      >
+      <div *ngIf="signUpForm.get('password')?.value !== signUpForm.get('confirmPassword')?.value && signUpForm.get('confirmPassword')?.touched" class="error-message">
+        Passwords do not match
+      </div>
+    </div>
+  </div>
+  <button
+    type="submit"
+    class="submit-button" [disabled]="signUpForm.invalid || signUpForm.get('password')?.value !== signUpForm.get('confirmPassword')?.value || signUpForm.get('password')?.value.length < 8 || signUpForm.get('email')?.invalid || signUpForm.get('companyName')?.invalid || signUpForm.get('phoneNumber')?.invalid ||  signUpForm.get('phoneNumber')?.value.length < 8 || signUpForm.get('firstName')?.invalid || signUpForm.get('lastName')?.invalid || signUpForm.get('confirmPassword')?.invalid"
+    (click)="onSignUp()"
+  >
+    <span>Create Account</span>
+    
+  </button>
+  <p class="sucess-message" *ngIf='submited'>
+    <span class="icon">✓</span>
+    <span>Account created successfully</span>
+  </p>
+</form>

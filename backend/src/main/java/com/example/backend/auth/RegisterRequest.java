@@ -32,6 +32,6 @@ public class RegisterRequest {
     @NotBlank(message = "Company name is required")
     private String companyName;
 
-    @NotBlank(message = "Phone number is required")
-    private String phoneNumber;
+    @NotBlank(message = "Phone is required")
+    private String phone;
 }

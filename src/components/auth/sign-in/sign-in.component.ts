@@ -41,7 +41,13 @@ export class SignInComponent {
       next: (res: any) => {
         console.log('Login successful:', res);
         this.authService.saveToken(res.token);
-        this.router.navigate(['/dashboard']);
+        const role = this.authService.getUserRole();
+        console.log('User role after login:', role);
+        if (role === 'ADMIN') {
+          this.router.navigate(['/admin']);
+        } else {
+          this.router.navigate(['/dashboard']);
+        }
       },
       error: (error) => {
         console.error('Login failed:', error);
@@ -49,5 +55,6 @@ export class SignInComponent {
         this.submited = false;
       }
     });
+    
   }
 }

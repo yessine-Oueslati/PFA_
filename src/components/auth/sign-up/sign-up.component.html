@@ -50,16 +50,8 @@
     <div *ngIf="signUpForm.get('companyName')?.invalid && signUpForm.get('companyName')?.touched" class="error-message">Company name is required</div>
   </div>
   <div class="form-group">
-    <label for="signup-phone" class="form-label">Phone Number</label>
-    <input
-      id="signup-phone"
-      type="tel"
-      formControlName="phoneNumber"
-      class="form-input"
-      placeholder="Enter your phone number"
-      autocomplete="tel"
-    >
-    <div *ngIf="signUpForm.get('phoneNumber')?.invalid && signUpForm.get('phoneNumber')?.touched" class="error-message">Phone number is required</div>
+    <label for="phone" class="form-label">Phone</label>
+    <input id="phone" name="phone" type="text" class="form-input" formControlName="phone" required placeholder="Enter your phone number" />
   </div>
   <div class="form-row">
     <div class="form-group half-width">
@@ -89,10 +81,11 @@
       </div>
     </div>
   </div>
+  <!-- Role input -->
+  
   <button
     type="submit"
-    class="submit-button" [disabled]="signUpForm.invalid || signUpForm.get('password')?.value !== signUpForm.get('confirmPassword')?.value || signUpForm.get('password')?.value.length < 8 || signUpForm.get('email')?.invalid || signUpForm.get('companyName')?.invalid || signUpForm.get('phoneNumber')?.invalid ||  signUpForm.get('phoneNumber')?.value.length < 8 || signUpForm.get('firstName')?.invalid || signUpForm.get('lastName')?.invalid || signUpForm.get('confirmPassword')?.invalid"
-    (click)="onSignUp()"
+    class="submit-button" [disabled]="signUpForm.invalid || signUpForm.get('password')?.value !== signUpForm.get('confirmPassword')?.value || signUpForm.get('password')?.value.length < 8 || signUpForm.get('email')?.invalid || signUpForm.get('companyName')?.invalid || signUpForm.get('firstName')?.invalid || signUpForm.get('lastName')?.invalid || signUpForm.get('confirmPassword')?.invalid"
   >
     <span>Create Account</span>
     

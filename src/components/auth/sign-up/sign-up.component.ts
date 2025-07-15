@@ -28,7 +28,7 @@ export class SignUpComponent {
       password: ['', [Validators.required, Validators.minLength(8)]],
       confirmPassword: ['', [Validators.required, Validators.minLength(8)]],
       companyName: ['', Validators.required],
-      phoneNumber: ['', Validators.required]
+      phone: '',
     });
   }
 
@@ -52,7 +52,7 @@ export class SignUpComponent {
       email: this.signUpForm.value.email,
       password: this.signUpForm.value.password,
       companyName: this.signUpForm.value.companyName,
-      phoneNumber: this.signUpForm.value.phoneNumber
+      phone: this.signUpForm.value.phone,
     };
     
     // Log all form data for debugging
@@ -69,7 +69,8 @@ export class SignUpComponent {
       },
       error: (error) => {
         console.error('Registration failed:', error);
-        alert('Registration failed: ' + (error.error?.message || 'Unknown error'));
+        let errorMsg = error.error?.message || error.error || error.message || 'Unknown error';
+        alert('Registration failed: ' + errorMsg);
         this.submited = false;
       }
     });

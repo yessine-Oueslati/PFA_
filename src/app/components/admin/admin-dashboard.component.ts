@@ -19,110 +19,82 @@ interface User {
   standalone: true,
   imports: [CommonModule, FormsModule],
   template: `
-    <div class="admin-dashboard-container">
-      <h1>Admin Dashboard</h1>
-      <input
-        type="text"
-        class="search-bar"
-        placeholder="Search by name..."
-        [(ngModel)]="searchTerm"
-        (input)="filterUsers()"
-      />
-      <table class="user-table">
-        <thead>
-          <tr>
-            <th>ID</th>
-            <th>First Name</th>
-            <th>Last Name</th>
-            <th>Email</th>
-            <th>Role</th>
-            <th>Secteur</th>
-            <th>Zone</th>
-            <th>Region</th>
-            <th>Actions</th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr *ngFor="let user of filteredUsers">
-            <td>{{ user.id }}</td>
-            <td>{{ user.firstName }}</td>
-            <td>{{ user.lastName }}</td>
-            <td>{{ user.email }}</td>
-            <td>{{ user.role }}</td>
-            <td>{{ user.secteurId || '-' }}</td>
-            <td>{{ user.zoneId || '-' }}</td>
-            <td>{{ user.regionId || '-' }}</td>
-            <td>
-              <button class="edit-btn" (click)="editUser(user)">Edit</button>
-              <button class="delete-btn" (click)="deleteUser(user)">Delete</button>
-              <button class="assign-btn" (click)="assignEntity(user)">Assign Entity</button>
-            </td>
-          </tr>
-        </tbody>
-      </table>
+    <div class="max-w-5xl mx-auto mt-10 p-6 bg-white rounded-xl shadow-lg border-t-8 border-red-600">
+      <div class="flex items-center justify-between mb-6">
+        <h1 class="text-3xl font-bold text-red-600">Admin Dashboard</h1>
+        <button class="flex items-center gap-2 bg-green-600 hover:bg-green-700 text-white font-semibold px-4 py-2 rounded shadow transition" (click)="addUser()">
+          <svg xmlns='http://www.w3.org/2000/svg' class='h-5 w-5' fill='none' viewBox='0 0 24 24' stroke='currentColor'><path stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M12 4v16m8-8H4'/></svg>
+          Add User
+        </button>
+      </div>
+      <div class="relative mb-4">
+        <input
+          type="text"
+          class="w-full pl-10 pr-4 py-2 border border-gray-200 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-red-400 text-base"
+          placeholder="Search by name..."
+          [(ngModel)]="searchTerm"
+          (input)="filterUsers()"
+        />
+        <span class="absolute left-3 top-2.5 text-gray-400">
+          <svg xmlns='http://www.w3.org/2000/svg' class='h-5 w-5' fill='none' viewBox='0 0 24 24' stroke='currentColor'><path stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M21 21l-4.35-4.35M17 11A6 6 0 1 0 5 11a6 6 0 0 0 12 0z'/></svg>
+        </span>
+      </div>
+      <div class="overflow-x-auto rounded-lg shadow">
+        <table class="min-w-full bg-white">
+          <thead>
+            <tr>
+              <th class="px-4 py-3 bg-red-600 text-white font-semibold">ID</th>
+              <th class="px-4 py-3 bg-red-600 text-white font-semibold">First Name</th>
+              <th class="px-4 py-3 bg-red-600 text-white font-semibold">Last Name</th>
+              <th class="px-4 py-3 bg-red-600 text-white font-semibold">Email</th>
+              <th class="px-4 py-3 bg-red-600 text-white font-semibold">Role</th>
+              <th class="px-4 py-3 bg-red-600 text-white font-semibold">Secteur</th>
+              <th class="px-4 py-3 bg-red-600 text-white font-semibold">Zone</th>
+              <th class="px-4 py-3 bg-red-600 text-white font-semibold">Region</th>
+              <th class="px-4 py-3 bg-red-600 text-white font-semibold">Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let user of filteredUsers" class="hover:bg-red-50 transition">
+              <td class="px-4 py-2 text-center">{{ user.id }}</td>
+              <td class="px-4 py-2">{{ user.firstName }}</td>
+              <td class="px-4 py-2">{{ user.lastName }}</td>
+              <td class="px-4 py-2">{{ user.email }}</td>
+              <td class="px-4 py-2">
+                <span [ngClass]="{
+                  'bg-red-100 text-red-700': user.role === 'ADMIN',
+                  'bg-blue-100 text-blue-700': user.role === 'CHEF_REGION',
+                  'bg-green-100 text-green-700': user.role === 'CHEF_SECTEUR',
+                  'bg-yellow-100 text-yellow-700': user.role === 'CHEF_ZONE',
+                  'bg-gray-100 text-gray-700': user.role !== 'ADMIN' && user.role !== 'CHEF_REGION' && user.role !== 'CHEF_SECTEUR' && user.role !== 'CHEF_ZONE'
+                }" class="inline-block px-3 py-1 rounded-full text-xs font-semibold">
+                  {{ user.role }}
+                </span>
+              </td>
+              <td class="px-4 py-2 text-center">{{ user.secteurId || '-' }}</td>
+              <td class="px-4 py-2 text-center">{{ user.zoneId || '-' }}</td>
+              <td class="px-4 py-2 text-center">{{ user.regionId || '-' }}</td>
+              <td class="px-4 py-2 flex items-center justify-center gap-2">
+                <button class="p-2 rounded hover:bg-red-100 transition" (click)="editUser(user)" title="Edit">
+                  <svg xmlns='http://www.w3.org/2000/svg' class='h-5 w-5 text-blue-600' fill='none' viewBox='0 0 24 24' stroke='currentColor'><path stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M15.232 5.232l3.536 3.536M9 13h3l8-8a2.828 2.828 0 1 0-4-4l-8 8v3z'/></svg>
+                </button>
+                <button class="p-2 rounded hover:bg-red-100 transition" (click)="deleteUser(user)" title="Delete">
+                  <svg xmlns='http://www.w3.org/2000/svg' class='h-5 w-5 text-red-600' fill='none' viewBox='0 0 24 24' stroke='currentColor'><path stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M6 18L18 6M6 6l12 12'/></svg>
+                </button>
+                <button class="p-2 rounded hover:bg-blue-100 transition" (click)="assignEntity(user)" title="Assign Entity">
+                  <svg xmlns='http://www.w3.org/2000/svg' class='h-5 w-5 text-green-600' fill='none' viewBox='0 0 24 24' stroke='currentColor'><path stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M12 4v16m8-8H4'/></svg>
+                </button>
+              </td>
+            </tr>
+            <tr *ngIf="filteredUsers.length === 0">
+              <td colspan="9" class="text-center py-6 text-gray-400">No users found.</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
     </div>
   `,
-  styles: [`
-    .admin-dashboard-container {
-      padding: 24px;
-      max-width: 1000px;
-      margin: 40px auto;
-      background: #fff;
-      border-radius: 8px;
-      box-shadow: 0 2px 8px rgba(0,0,0,0.05);
-      border-top: 8px solid #dc3545;
-    }
-    h1 {
-      color: #dc3545;
-      margin-bottom: 24px;
-    }
-    .search-bar {
-      width: 100%;
-      padding: 10px 14px;
-      margin-bottom: 18px;
-      border: 1px solid #eee;
-      border-radius: 6px;
-      font-size: 1rem;
-    }
-    .user-table {
-      width: 100%;
-      border-collapse: collapse;
-    }
-    .user-table th, .user-table td {
-      border: 1px solid #eee;
-      padding: 8px 12px;
-      text-align: center;
-    }
-    .user-table th {
-      background: #dc3545;
-      color: #fff;
-    }
-    .edit-btn, .delete-btn, .assign-btn {
-      background: #dc3545;
-      color: #fff;
-      border: none;
-      border-radius: 4px;
-      padding: 6px 10px;
-      cursor: pointer;
-      margin: 0 2px;
-      font-size: 0.95rem;
-    }
-    .edit-btn:hover, .delete-btn:hover, .assign-btn:hover {
-      background: #b71c1c;
-    }
-    .delete-btn {
-      background: #757575;
-    }
-    .delete-btn:hover {
-      background: #333;
-    }
-    .assign-btn {
-      background: #1976d2;
-    }
-    .assign-btn:hover {
-      background: #0d47a1;
-    }
-  `]
+  styles: []
 })
 export class AdminDashboardComponent implements OnInit {
   users: User[] = [];
@@ -164,5 +136,9 @@ export class AdminDashboardComponent implements OnInit {
 
   assignEntity(user: User) {
     alert('Assign entity to user: ' + user.email + ' (feature coming soon)');
+  }
+
+  addUser() {
+    alert('Add user (feature coming soon)');
   }
 } 

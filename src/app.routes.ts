@@ -1,7 +1,7 @@
 import { Routes } from '@angular/router';
 import { AuthComponent } from './components/auth/auth.component';
-import { DashboardComponent } from './components/dashboard/dashboard.component';
 import { AuthGuard } from './services/auth.guard';
+import { AdminDashboardIframeComponent } from './app/components/dash.component';
 import { AdminDashboardComponent } from './app/components/admin/admin-dashboard.component';
 
 /**
@@ -16,7 +16,7 @@ export const routes: Routes = [
   { path: 'auth', component: AuthComponent },
   
   // Dashboard route
-  { path: 'dashboard', component: DashboardComponent },
+  { path: 'dashboard', component: AdminDashboardIframeComponent },
 
   {
     path: 'admin',

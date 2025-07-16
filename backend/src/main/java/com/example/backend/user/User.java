@@ -28,6 +28,9 @@ public class User implements UserDetails {
     private String company;
     private String password;
     private String phone;
+    private String secteur;
+    private String zone;
+    private String region;
     
     @Enumerated(EnumType.STRING)
     private Role role;

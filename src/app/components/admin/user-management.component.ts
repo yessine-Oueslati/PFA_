@@ -5,15 +5,11 @@ import { HttpClient } from '@angular/common/http';
 
 interface User {
   id: number;
-  firstName: string;
-  lastName: string;
+  name: string;
   email: string;
-  company?: string;
-  phone?: string;
-  role: string;
-  secteur?: string;
-  zone?: string;
-  region?: string;
+  phone: string;
+  jobTitle: string;
+  departement: string;
 }
 
 @Component({
@@ -34,26 +30,22 @@ interface User {
         <thead>
           <tr>
             <th>ID</th>
-            <th>First Name</th>
-            <th>Last Name</th>
+            <th>Name</th>
             <th>Email</th>
-            <th>Role</th>
-            <th>Secteur</th>
-            <th>Zone</th>
-            <th>Region</th>
+            <th>Phone</th>
+            <th>Job Title</th>
+            <th>Departement</th>
             <th>Actions</th>
           </tr>
         </thead>
         <tbody>
           <tr *ngFor="let user of filteredUsers">
             <td>{{ user.id }}</td>
-            <td>{{ user.firstName }}</td>
-            <td>{{ user.lastName }}</td>
+            <td>{{ user.name }}</td>
             <td>{{ user.email }}</td>
-            <td>{{ user.role }}</td>
-            <td>{{ user.secteur || '-' }}</td>
-            <td>{{ user.zone || '-' }}</td>
-            <td>{{ user.region || '-' }}</td>
+            <td>{{ user.phone }}</td>
+            <td>{{ user.jobTitle }}</td>
+            <td>{{ user.departement }}</td>
             <td>
               <button class="edit-btn" (click)="editUser(user)">Edit</button>
               <button class="delete-btn" (click)="deleteUser(user)">Delete</button>
@@ -62,34 +54,32 @@ interface User {
         </tbody>
       </table>
 
-      <!-- Edit Role Modal -->
+      <!-- Edit Modal (optional, can be left as is or updated) -->
       <div *ngIf="isEditModalOpen" class="modal-backdrop">
         <div class="modal">
-          <h2>Edit User Role</h2>
+          <h2>Edit Employee</h2>
           <div>
-            <label>Role:</label>
-            <select [(ngModel)]="editRole">
-              <option value="USER">User</option>
-              <option value="ADMIN">Admin</option>
-              <option value="CHEF_SECTEUR">Chef Secteur</option>
-              <option value="CHEF_ZONE">Chef Zone</option>
-              <option value="CHEF_REGION">Chef Region</option>
-            </select>
+            <label>Name:</label>
+            <input [(ngModel)]="editName" placeholder="Name" />
           </div>
-          <div *ngIf="editRole === 'CHEF_SECTEUR'">
-            <label>Secteur:</label>
-            <input [(ngModel)]="editSecteur" placeholder="Secteur" />
+          <div>
+            <label>Email:</label>
+            <input [(ngModel)]="editEmail" placeholder="Email" />
           </div>
-          <div *ngIf="editRole === 'CHEF_ZONE'">
-            <label>Zone:</label>
-            <input [(ngModel)]="editZone" placeholder="Zone" />
+          <div>
+            <label>Phone:</label>
+            <input [(ngModel)]="editPhone" placeholder="Phone" />
           </div>
-          <div *ngIf="editRole === 'CHEF_REGION'">
-            <label>Region:</label>
-            <input [(ngModel)]="editRegion" placeholder="Region" />
+          <div>
+            <label>Job Title:</label>
+            <input [(ngModel)]="editJobTitle" placeholder="Job Title" />
+          </div>
+          <div>
+            <label>Departement:</label>
+            <input [(ngModel)]="editDepartement" placeholder="Departement" />
           </div>
           <div class="modal-actions">
-            <button (click)="saveUserRole()">Save</button>
+            <button (click)="saveUser()">Save</button>
             <button (click)="closeEditModal()">Cancel</button>
           </div>
         </div>
@@ -169,10 +159,11 @@ export class UserManagementComponent implements OnInit {
   // Modal state
   isEditModalOpen = false;
   editingUser: User | null = null;
-  editRole: string = '';
-  editSecteur: string = '';
-  editZone: string = '';
-  editRegion: string = '';
+  editName: string = '';
+  editEmail: string = '';
+  editPhone: string = '';
+  editJobTitle: string = '';
+  editDepartement: string = '';
 
   constructor(private http: HttpClient) {}
 
@@ -181,7 +172,7 @@ export class UserManagementComponent implements OnInit {
   }
 
   fetchUsers() {
-    this.http.get<User[]>('/api/admin/users').subscribe(users => {
+    this.http.get<User[]>('/api/employees/all').subscribe(users => {
       this.users = users;
       this.filterUsers();
     });
@@ -190,35 +181,28 @@ export class UserManagementComponent implements OnInit {
   filterUsers() {
     const term = this.searchTerm.toLowerCase();
     this.filteredUsers = this.users.filter(user =>
-      user.firstName.toLowerCase().includes(term) ||
-      user.lastName.toLowerCase().includes(term) ||
-      user.email.toLowerCase().includes(term)
+      user.name.toLowerCase().includes(term) ||
+      user.email.toLowerCase().includes(term) ||
+      user.jobTitle.toLowerCase().includes(term) ||
+      user.departement.toLowerCase().includes(term)
     );
   }
 
   editUser(user: User) {
     this.editingUser = { ...user };
-    this.editRole = user.role;
-    this.editSecteur = user.secteur || '';
-    this.editZone = user.zone || '';
-    this.editRegion = user.region || '';
+    this.editName = user.name;
+    this.editEmail = user.email;
+    this.editPhone = user.phone;
+    this.editJobTitle = user.jobTitle;
+    this.editDepartement = user.departement;
     this.isEditModalOpen = true;
   }
 
-  saveUserRole() {
-    if (!this.editingUser) return;
-    const payload: any = {
-      role: this.editRole,
-      secteur: this.editRole === 'CHEF_SECTEUR' ? this.editSecteur : '',
-      zone: this.editRole === 'CHEF_ZONE' ? this.editZone : '',
-      region: this.editRole === 'CHEF_REGION' ? this.editRegion : ''
-    };
-    this.http.put<User>(`/api/admin/users/${this.editingUser.id}/role`, payload)
-      .subscribe(() => {
-        this.isEditModalOpen = false;
-        this.editingUser = null;
-        this.fetchUsers();
-      });
+  saveUser() {
+    // Implement update logic if needed
+    this.isEditModalOpen = false;
+    this.editingUser = null;
+    this.fetchUsers();
   }
 
   closeEditModal() {
@@ -227,14 +211,10 @@ export class UserManagementComponent implements OnInit {
   }
 
   deleteUser(user: User) {
-    if (confirm(`Are you sure you want to delete user ${user.email}?`)) {
-      this.http.delete(`/api/admin/users/${user.id}`).subscribe(() => {
+    if (confirm(`Are you sure you want to delete employee ${user.email}?`)) {
+      this.http.delete(`/api/employees/delete/${user.id}`).subscribe(() => {
         this.fetchUsers();
       });
     }
-  }
-
-  assignEntity(user: User) {
-    alert('Assign entity to user: ' + user.email + ' (feature coming soon)');
   }
 } 

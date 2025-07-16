@@ -1,7 +1,7 @@
 import { Routes } from '@angular/router';
 import { AuthComponent } from './components/auth/auth.component';
 import { AuthGuard } from './services/auth.guard';
-import { AdminDashboardIframeComponent } from './app/components/dash.component';
+import { DashboardComponent } from './app/components/dashboard/dashboard.component';
 import { UserManagementComponent } from './app/components/admin/user-management.component';
 import { EmployeeManagementComponent } from './app/components/admin/employee-management.component';
 
@@ -17,7 +17,7 @@ export const routes: Routes = [
   { path: 'auth', component: AuthComponent },
   
   // Dashboard route
-  { path: 'dashboard', component: AdminDashboardIframeComponent },
+  { path: 'dashboard', component: DashboardComponent },
 
   {
     path: 'admin',

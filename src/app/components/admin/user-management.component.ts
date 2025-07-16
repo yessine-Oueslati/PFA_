@@ -17,12 +17,12 @@ interface User {
 }
 
 @Component({
-  selector: 'app-admin-dashboard',
+  selector: 'app-user-management',
   standalone: true,
   imports: [CommonModule, FormsModule],
   template: `
     <div class="admin-dashboard-container">
-      <h1>Admin Dashboard</h1>
+      <h1>User Management</h1>
       <input
         type="text"
         class="search-bar"
@@ -161,7 +161,7 @@ interface User {
      .modal-actions { margin-top: 16px; display: flex; gap: 8px; justify-content: flex-end; }
   `]
 })
-export class AdminDashboardComponent implements OnInit {
+export class UserManagementComponent implements OnInit {
   users: User[] = [];
   filteredUsers: User[] = [];
   searchTerm: string = '';
@@ -213,7 +213,7 @@ export class AdminDashboardComponent implements OnInit {
       zone: this.editRole === 'CHEF_ZONE' ? this.editZone : '',
       region: this.editRole === 'CHEF_REGION' ? this.editRegion : ''
     };
-    this.http.put<User>(`http://localhost:8080/api/admin/users/${this.editingUser.id}/role`, payload)
+    this.http.put<User>(`/api/admin/users/${this.editingUser.id}/role`, payload)
       .subscribe(() => {
         this.isEditModalOpen = false;
         this.editingUser = null;
@@ -228,7 +228,7 @@ export class AdminDashboardComponent implements OnInit {
 
   deleteUser(user: User) {
     if (confirm(`Are you sure you want to delete user ${user.email}?`)) {
-      this.http.delete(`http://localhost:8080/api/admin/users/${user.id}`).subscribe(() => {
+      this.http.delete(`/api/admin/users/${user.id}`).subscribe(() => {
         this.fetchUsers();
       });
     }

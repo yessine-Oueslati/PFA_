@@ -2,7 +2,8 @@ import { Routes } from '@angular/router';
 import { AuthComponent } from './components/auth/auth.component';
 import { AuthGuard } from './services/auth.guard';
 import { AdminDashboardIframeComponent } from './app/components/dash.component';
-import { AdminDashboardComponent } from './app/components/admin/admin-dashboard.component';
+import { UserManagementComponent } from './app/components/admin/user-management.component';
+import { EmployeeManagementComponent } from './app/components/admin/employee-management.component';
 
 /**
  * Application routes configuration
@@ -20,7 +21,7 @@ export const routes: Routes = [
 
   {
     path: 'admin',
-    component: AdminDashboardComponent,
+    component: EmployeeManagementComponent,
     canActivate: [AuthGuard],
     data: { roles: ['ADMIN'] }
   },

@@ -13,7 +13,7 @@ public class Employee implements Serializable {
     private String email;
     private String jobTitle;
     private String phone;
-    private String imageUrl;
+    private String departement;
     private String employeeCode;
 
     public Employee() {}
@@ -23,7 +23,7 @@ public class Employee implements Serializable {
         this.email = email;
         this.jobTitle = jobTitle;
         this.phone = phone;
-        this.imageUrl = imageUrl;
+        this.departement = departement;
         this.employeeCode = employeeCode;
     }
 
@@ -37,8 +37,8 @@ public class Employee implements Serializable {
     public void setJobTitle(String jobTitle) { this.jobTitle = jobTitle; }
     public String getPhone() { return phone; }
     public void setPhone(String phone) { this.phone = phone; }
-    public String getImageUrl() { return imageUrl; }
-    public void setImageUrl(String imageUrl) { this.imageUrl = imageUrl; }
+    public String getDepartement() { return departement; }
+    public void setDepartement(String departement) { this.departement = departement; }
     public String getEmployeeCode() { return employeeCode; }
     public void setEmployeeCode(String employeeCode) { this.employeeCode = employeeCode; }
 
@@ -50,7 +50,7 @@ public class Employee implements Serializable {
                 ", email='" + email + '\'' +
                 ", jobTitle='" + jobTitle + '\'' +
                 ", phone='" + phone + '\'' +
-                ", imageUrl='" + imageUrl + '\'' +
+                ", departement='" + departement + '\'' +
                 ", employeeCode='" + employeeCode + '\'' +
                 '}';
     }

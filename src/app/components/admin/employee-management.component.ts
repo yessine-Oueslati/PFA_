@@ -8,24 +8,32 @@ import { EmployeeService, Employee } from '../../services/employee.service';
   standalone: true,
   imports: [CommonModule, FormsModule],
   template: `
-    <div class="admin-dashboard-container">
+    <div class="activity-log-top-card">
+      <h3>Activity Log</h3>
+      <ul class="activity-log-list">
+        <li *ngFor="let log of activityLog">{{ log }}</li>
+        <li *ngIf="activityLog.length === 0" class="no-activity">No recent activity.</li>
+      </ul>
+    </div>
+
+    <div class="dashboard-main">
       <div *ngIf="notification.message" [ngClass]="{'notif-success': notification.type === 'success', 'notif-error': notification.type === 'error'}" class="notif-banner">
         {{ notification.message }}
       </div>
       <div class="dashboard-header">
-        <input
-          type="text"
-          class="search-bar"
-          placeholder="Search by name..."
-          [(ngModel)]="searchTerm"
-          (input)="filterEmployees()"
-        />
-        <button (click)="openAddModal()" class="add-btn">
-          <span style="display: flex; align-items: center; gap: 8px;">
-            <svg width="20" height="20" fill="none" viewBox="0 0 24 24" stroke="currentColor" style="vertical-align: middle;"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
+        <div class="search-add-row">
+          <input
+            type="text"
+            class="search-bar"
+            placeholder="Search by name..."
+            [(ngModel)]="searchTerm"
+            (input)="filterEmployees()"
+          />
+          <button (click)="openAddModal()" class="add-btn">
+            <span class="material-icons">person_add</span>
             Add Employee
-          </span>
-        </button>
+          </button>
+        </div>
       </div>
       <!-- Modern horizontal summary bar -->
       <div class="summary-bar">
@@ -54,8 +62,8 @@ import { EmployeeService, Employee } from '../../services/employee.service';
           <span class="summary-count">{{ departementCounts['Shops'] || 0 }}</span>
         </div>
       </div>
-      <div class="table-container">
-        <table class="user-table">
+      <div class="table-card">
+        <table class="employee-table">
           <thead>
             <tr>
               <th>ID</th>
@@ -73,11 +81,19 @@ import { EmployeeService, Employee } from '../../services/employee.service';
               <td>{{ employee.name }}</td>
               <td>{{ employee.email }}</td>
               <td>{{ employee.phone }}</td>
-              <td>{{ employee.jobTitle }}</td>
+              <td>
+                <span [ngClass]="getJobTitleClass(employee.jobTitle)" class="job-title-badge">
+                  {{ employee.jobTitle }}
+                </span>
+              </td>
               <td>{{ employee.departement }}</td>
               <td>
-                <button class="edit-btn" (click)="editEmployee(employee)">Edit</button>
-                <button class="delete-btn" (click)="deleteEmployee(employee)">Delete</button>
+                <button class="icon-btn edit-btn" (click)="editEmployee(employee)" title="Edit">
+                  <span class="material-icons">edit</span>
+                </button>
+                <button class="icon-btn delete-btn" (click)="deleteEmployee(employee)" title="Delete">
+                  <span class="material-icons">delete</span>
+                </button>
               </td>
             </tr>
             <tr *ngIf="filteredEmployees.length === 0">
@@ -146,6 +162,7 @@ export class EmployeeManagementComponent implements OnInit {
   employees: Employee[] = [];
   filteredEmployees: Employee[] = [];
   searchTerm: string = '';
+  activityLog: string[] = [];
 
   isModalOpen = false;
   editingEmployee: Employee | null = null;
@@ -206,6 +223,7 @@ export class EmployeeManagementComponent implements OnInit {
           this.isModalOpen = false;
           this.fetchEmployees();
           this.showNotification('Employee updated successfully!', 'success');
+          this.addActivity(`Employee ${this.modalEmployee.name} updated at ${new Date().toLocaleTimeString()}`);
         },
         error: () => this.showNotification('Failed to update employee.', 'error')
       });
@@ -216,6 +234,7 @@ export class EmployeeManagementComponent implements OnInit {
           this.isModalOpen = false;
           this.fetchEmployees();
           this.showNotification('Employee added successfully!', 'success');
+          this.addActivity(`Employee ${this.modalEmployee.name} added at ${new Date().toLocaleTimeString()}`);
         },
         error: () => this.showNotification('Failed to add employee.', 'error')
       });
@@ -228,6 +247,7 @@ export class EmployeeManagementComponent implements OnInit {
         next: () => {
           this.fetchEmployees();
           this.showNotification('Employee deleted successfully!', 'success');
+          this.addActivity(`Employee ${employee.name} deleted at ${new Date().toLocaleTimeString()}`);
         },
         error: () => this.showNotification('Failed to delete employee.', 'error')
       });
@@ -252,6 +272,26 @@ export class EmployeeManagementComponent implements OnInit {
       }
       // If you have a role property, count admins here. Placeholder:
       if ((emp as any).role === 'ADMIN') this.adminCount++;
+    }
+  }
+
+  getJobTitleClass(jobTitle: string): string {
+    switch (jobTitle) {
+      case 'Chef Departement':
+        return 'job-title-badge-chef-departement';
+      case 'Chef Zone':
+        return 'job-title-badge-chef-zone';
+      case 'Chef Region':
+        return 'job-title-badge-chef-region';
+      default:
+        return '';
+    }
+  }
+
+  addActivity(message: string) {
+    this.activityLog.unshift(message);
+    if (this.activityLog.length > 10) {
+      this.activityLog.pop();
     }
   }
 } 

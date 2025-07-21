@@ -16,24 +16,50 @@ interface Assignment {
   standalone: true,
   imports: [CommonModule, FormsModule],
   template: `
-    <div class="activity-log-top-card">
-      <h3>Activity Log</h3>
-      <ul class="activity-log-list">
-        <li *ngFor="let log of activityLog">{{ log }}</li>
-        <li *ngIf="activityLog.length === 0" class="no-activity">No recent activity.</li>
-      </ul>
+    <!-- Main Navbar -->
+    <header class="main-navbar">
+      <img src="https://www.ooredoo.com/wp-content/uploads/2015/12/Ooredoo-Logo_CMYK_On-White-BG_FA-01.png" alt="Ooredoo Logo" class="navbar-logo" />
+      <nav class="nav-tabs">
+        <button [class.active]="activeTab === 'employees'" (click)="activeTab = 'employees'">Employees</button>
+        <button [class.active]="activeTab === 'zones'" (click)="activeTab = 'zones'">Zones</button>
+        <button [class.active]="activeTab === 'regions'" (click)="activeTab = 'regions'">Regions</button>
+        <button [class.active]="activeTab === 'secteurs'" (click)="activeTab = 'secteurs'">Secteurs</button>
+        <button [class.active]="activeTab === 'logs'" (click)="activeTab = 'logs'">Logs</button>
+      </nav>
+    </header>
+
+    <!-- Summary Bar -->
+    <div class="summary-bar">
+      <div class="summary-card">
+        <span class="material-icons" style="font-size: 20px; color: #d32f2f;">people</span>
+        <span class="summary-label">Employees</span>
+        <span class="summary-count">{{ employees.length }}</span>
+      </div>
+      <div class="summary-card">
+        <svg width="20" height="20" fill="none" viewBox="0 0 24 24" stroke="#d32f2f"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 21c-4.418 0-8-4.03-8-9a8 8 0 1 1 16 0c0 4.97-3.582 9-8 9zm0-7a2 2 0 1 0 0-4 2 2 0 0 0 0 4z"/></svg>
+        <span class="summary-label">Region</span>
+        <span class="summary-count">{{ regions.length }}</span>
+      </div>
+      <div class="summary-card">
+        <svg width="20" height="20" fill="none" viewBox="0 0 24 24" stroke="#d32f2f"><polygon points="12 2 22 7 12 12 2 7 12 2" stroke-width="2" stroke-linejoin="round"/><polyline points="2 17 12 22 22 17" stroke-width="2" stroke-linejoin="round"/><polyline points="2 12 12 17 22 12" stroke-width="2" stroke-linejoin="round"/></svg>
+        <span class="summary-label">Sector</span>
+        <span class="summary-count">{{ secteurs.length }}</span>
+      </div>
+      <div class="summary-card">
+        <svg width="20" height="20" fill="none" viewBox="0 0 24 24" stroke="#d32f2f"><circle cx="12" cy="12" r="10" stroke-width="2"/><path d="M2 12h20M12 2a15.3 15.3 0 0 1 0 20M12 2a15.3 15.3 0 0 0 0 20" stroke-width="2" stroke-linecap="round"/></svg>
+        <span class="summary-label">Zone</span>
+        <span class="summary-count">{{ zones.length }}</span>
+      </div>
     </div>
 
-    <div class="dashboard-main">
-      <div *ngIf="notification.message" [ngClass]="{'notif-success': notification.type === 'success', 'notif-error': notification.type === 'error'}" class="notif-banner">
-        {{ notification.message }}
-      </div>
+    <!-- Employees Tab -->
+    <div *ngIf="activeTab === 'employees'">
       <div class="dashboard-header">
         <div class="search-add-row">
           <input
             type="text"
             class="search-bar"
-            placeholder="Search by name..."
+            placeholder="Search by name or email..."
             [(ngModel)]="searchTerm"
             (input)="filterEmployees()"
           />
@@ -41,51 +67,6 @@ interface Assignment {
             <span class="material-icons">person_add</span>
             Add Employee
           </button>
-          <button (click)="openAddZoneModal()" class="add-btn">
-            <span class="material-icons">add_location</span>
-            Add Zone
-          </button>
-          <button (click)="openAddRegionModal()" class="add-btn">
-            <span class="material-icons">public</span>
-            Add Region
-          </button>
-          <button (click)="openAddSecteurModal()" class="add-btn">
-            <span class="material-icons">layers</span>
-            Add Secteur
-          </button>
-        </div>
-      </div>
-      <!-- Modern horizontal summary bar -->
-      <div class="summary-bar">
-        <div class="summary-card">
-          <!-- Employees: People Icon -->
-          <span class="material-icons" style="font-size: 20px; color: #d32f2f;">people</span>
-          <span class="summary-label">Employees</span>
-          <span class="summary-count">{{ employees.length }}</span>
-        </div>
-        <div class="summary-card">
-          <!-- Region: Map Pin Icon -->
-          <svg width="20" height="20" fill="none" viewBox="0 0 24 24" stroke="#d32f2f"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 21c-4.418 0-8-4.03-8-9a8 8 0 1 1 16 0c0 4.97-3.582 9-8 9zm0-7a2 2 0 1 0 0-4 2 2 0 0 0 0 4z"/></svg>
-          <span class="summary-label">Region</span>
-          <span class="summary-count">{{ regions.length }}</span>
-        </div>
-        <div class="summary-card">
-          <!-- Sector: Layers Icon -->
-          <svg width="20" height="20" fill="none" viewBox="0 0 24 24" stroke="#d32f2f"><polygon points="12 2 22 7 12 12 2 7 12 2" stroke-width="2" stroke-linejoin="round"/><polyline points="2 17 12 22 22 17" stroke-width="2" stroke-linejoin="round"/><polyline points="2 12 12 17 22 12" stroke-width="2" stroke-linejoin="round"/></svg>
-          <span class="summary-label">Sector</span>
-          <span class="summary-count">{{ secteurs.length }}</span>
-        </div>
-        <div class="summary-card">
-          <!-- Zone: Globe Icon -->
-          <svg width="20" height="20" fill="none" viewBox="0 0 24 24" stroke="#d32f2f"><circle cx="12" cy="12" r="10" stroke-width="2"/><path d="M2 12h20M12 2a15.3 15.3 0 0 1 0 20M12 2a15.3 15.3 0 0 0 0 20" stroke-width="2" stroke-linecap="round"/></svg>
-          <span class="summary-label">Zone</span>
-          <span class="summary-count">{{ zones.length }}</span>
-        </div>
-        <div class="summary-card">
-          <!-- Shops: Storefront Icon -->
-          <svg width="20" height="20" fill="none" viewBox="0 0 24 24" stroke="#d32f2f"><path d="M3 9l1.5-6h15L21 9M3 9h18M3 9l1.5 10.5A2 2 0 0 0 6.5 21h11a2 2 0 0 0 2-1.5L21 9" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><rect x="7" y="13" width="4" height="6" rx="1" stroke-width="2"/></svg>
-          <span class="summary-label">Shops</span>
-          <span class="summary-count">{{ departementCounts['Shops'] || 0 }}</span>
         </div>
       </div>
       <div class="table-card">
@@ -123,7 +104,16 @@ interface Assignment {
           </tbody>
         </table>
       </div>
+    </div>
 
+    <!-- Zones Tab -->
+    <div *ngIf="activeTab === 'zones'">
+      <div class="search-add-row">
+        <button (click)="openAddZoneModal()" class="add-btn">
+          <span class="material-icons">add_location</span>
+          Add Zone
+        </button>
+      </div>
       <div class="table-card">
         <h3 class="employee-table-heading">Zones Table</h3>
         <table class="employee-table">
@@ -146,7 +136,16 @@ interface Assignment {
           </tbody>
         </table>
       </div>
+    </div>
 
+    <!-- Regions Tab -->
+    <div *ngIf="activeTab === 'regions'">
+      <div class="search-add-row">
+        <button (click)="openAddRegionModal()" class="add-btn">
+          <span class="material-icons">public</span>
+          Add Region
+        </button>
+      </div>
       <div class="table-card">
         <h3 class="employee-table-heading">Regions Table</h3>
         <table class="employee-table">
@@ -171,140 +170,15 @@ interface Assignment {
           </tbody>
         </table>
       </div>
+    </div>
 
-      <!-- Add/Edit Modal -->
-      <div *ngIf="isModalOpen" class="modal-backdrop">
-        <div class="modal">
-          <div class="modal-header">
-            <h2>{{ editingEmployee ? 'Edit Employee' : 'Add Employee' }}</h2>
-            <button (click)="closeModal()" class="close-modal" aria-label="Close">&times;</button>
-          </div>
-          <hr class="modal-divider" />
-          <form (ngSubmit)="saveEmployee()" class="modal-form">
-            <div class="form-group">
-              <label for="modalName">Name:</label>
-              <input id="modalName" [(ngModel)]="modalEmployee.name" name="modalName" required />
-            </div>
-            <div class="form-group">
-              <label for="modalEmail">Email:</label>
-              <input id="modalEmail" [(ngModel)]="modalEmployee.email" name="modalEmail" required />
-            </div>
-            <div class="form-group">
-              <label for="modalPhone">Phone:</label>
-              <input id="modalPhone" [(ngModel)]="modalEmployee.phone" name="modalPhone" required />
-            </div>
-            <div class="form-group">
-              <label for="assignmentType">Assign To:</label>
-              <select id="assignmentType" [(ngModel)]="employeeAssignment.type" name="assignmentType" required class="form-select">
-                <option [ngValue]="null" disabled>Select Type</option>
-                <option value="zone">Zone</option>
-                <option value="region">Region</option>
-                <option value="secteur">Secteur</option>
-              </select>
-            </div>
-            <div class="form-group" *ngIf="employeeAssignment.type">
-              <label for="assignmentId">Select {{ employeeAssignment.type }}:</label>
-              <select id="assignmentId" [(ngModel)]="employeeAssignment.id" name="assignmentId" required class="form-select">
-                <ng-container [ngSwitch]="employeeAssignment.type">
-                  <ng-template ngSwitchCase="zone">
-                    <option *ngFor="let zone of zones" [ngValue]="zone.id">{{ zone.name }}</option>
-                  </ng-template>
-                  <ng-template ngSwitchCase="region">
-                    <option *ngFor="let region of regions" [ngValue]="region.id">{{ region.name }}</option>
-                  </ng-template>
-                  <ng-template ngSwitchCase="secteur">
-                    <option *ngFor="let secteur of secteurs" [ngValue]="secteur.id">{{ secteur.name }}</option>
-                  </ng-template>
-                </ng-container>
-              </select>
-            </div>
-            <div class="modal-actions">
-              <button type="submit" class="save-btn">Save</button>
-              <button type="button" (click)="closeModal()" class="cancel-btn">Cancel</button>
-            </div>
-          </form>
-        </div>
-      </div>
-      <!-- Add Zone Modal -->
-      <div *ngIf="isZoneModalOpen" class="modal-backdrop">
-        <div class="modal">
-          <h2>Add Zone</h2>
-          <form (ngSubmit)="saveZone()" #addZoneForm="ngForm" class="modal-form">
-            <div class="form-group">
-              <label for="zoneName">Zone Name:</label>
-              <input id="zoneName" [(ngModel)]="zoneForm.name" name="zoneName" required />
-            </div>
-            <div class="form-group">
-              <label for="chefZone">Chef Zone:</label>
-              <input id="chefZone" [(ngModel)]="zoneForm.chefZone" name="chefZone" required />
-            </div>
-            <div class="modal-actions">
-              <button type="submit" [disabled]="!addZoneForm.valid" class="save-btn">Save</button>
-              <button type="button" (click)="closeZoneModal()" class="cancel-btn">Cancel</button>
-            </div>
-          </form>
-        </div>
-      </div>
-      <!-- Add Region Modal -->
-      <div *ngIf="isRegionModalOpen" class="modal-backdrop">
-        <div class="modal">
-          <h2>Add Region</h2>
-          <form (ngSubmit)="saveRegion()" #addRegionForm="ngForm" class="modal-form">
-            <div class="form-group">
-              <label for="regionZone">Zone:</label>
-              <select id="regionZone" [(ngModel)]="regionForm.zoneId" name="regionZone" required class="form-select">
-                <option [ngValue]="null" disabled>Select a Zone</option>
-                <option *ngFor="let zone of zones" [value]="zone.id">{{ zone.name }}</option>
-              </select>
-            </div>
-            <div class="form-group">
-              <label for="regionName">Region Name:</label>
-              <input id="regionName" [(ngModel)]="regionForm.name" name="regionName" required />
-            </div>
-            <div class="form-group">
-              <label for="chefRegion">Region Head:</label>
-              <input id="chefRegion" [(ngModel)]="regionForm.chefRegion" name="chefRegion" required />
-            </div>
-            <div class="modal-actions">
-              <button type="submit" [disabled]="!addRegionForm.valid" class="save-btn">Save</button>
-              <button type="button" (click)="closeRegionModal()" class="cancel-btn">Cancel</button>
-            </div>
-          </form>
-        </div>
-      </div>
-      <!-- Add Secteur Modal -->
-      <div *ngIf="isSecteurModalOpen" class="modal-backdrop">
-        <div class="modal">
-          <h2>Add Secteur</h2>
-          <form (ngSubmit)="saveSecteur()" #addSecteurForm="ngForm" class="modal-form">
-            <div class="form-group">
-              <label for="secteurZone">Zone:</label>
-              <select id="secteurZone" [(ngModel)]="secteurForm.zoneId" name="secteurZone" required class="form-select" (change)="filterRegionsByZone()">
-                <option [ngValue]="null" disabled>Select a Zone</option>
-                <option *ngFor="let zone of zones" [ngValue]="zone.id">{{ zone.name }}</option>
-              </select>
-            </div>
-            <div class="form-group">
-              <label for="secteurRegion">Region:</label>
-              <select id="secteurRegion" [(ngModel)]="secteurForm.regionId" name="secteurRegion" required class="form-select">
-                <option [ngValue]="null" disabled>Select a Region</option>
-                <option *ngFor="let region of filteredRegions" [ngValue]="region.id">{{ region.name }}</option>
-              </select>
-            </div>
-            <div class="form-group">
-              <label for="secteurName">Secteur Name:</label>
-              <input id="secteurName" [(ngModel)]="secteurForm.name" name="secteurName" required />
-            </div>
-            <div class="form-group">
-              <label for="secteurHead">Secteur Head:</label>
-              <input id="secteurHead" [(ngModel)]="secteurForm.chefSecteur" name="secteurHead" required />
-            </div>
-            <div class="modal-actions">
-              <button type="submit" [disabled]="!addSecteurForm.valid" class="save-btn">Save</button>
-              <button type="button" (click)="closeSecteurModal()" class="cancel-btn">Cancel</button>
-            </div>
-          </form>
-        </div>
+    <!-- Secteurs Tab -->
+    <div *ngIf="activeTab === 'secteurs'">
+      <div class="search-add-row">
+        <button (click)="openAddSecteurModal()" class="add-btn">
+          <span class="material-icons">layers</span>
+          Add Secteur
+        </button>
       </div>
       <div class="table-card">
         <h3 class="employee-table-heading">Secteurs Table</h3>
@@ -333,6 +207,165 @@ interface Assignment {
         </table>
       </div>
     </div>
+
+    <!-- Logs Tab -->
+    <div *ngIf="activeTab === 'logs'">
+      <div class="table-card">
+        <h3 class="employee-table-heading">Activity Log</h3>
+        <table class="employee-table">
+          <thead>
+            <tr>
+              <th>Timestamp</th>
+              <th>Action</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let log of activityLog">
+              <td>{{ log.timestamp }}</td>
+              <td>{{ log.message }}</td>
+            </tr>
+            <tr *ngIf="activityLog.length === 0">
+              <td colspan="2" class="no-employees">No activity yet.</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- Add/Edit Modal -->
+    <div *ngIf="isModalOpen" class="modal-backdrop">
+      <div class="modal">
+        <div class="modal-header">
+          <h2>{{ editingEmployee ? 'Edit Employee' : 'Add Employee' }}</h2>
+          <button (click)="closeModal()" class="close-modal" aria-label="Close">&times;</button>
+        </div>
+        <hr class="modal-divider" />
+        <form (ngSubmit)="saveEmployee()" class="modal-form">
+          <div class="form-group">
+            <label for="modalName">Name:</label>
+            <input id="modalName" [(ngModel)]="modalEmployee.name" name="modalName" required />
+          </div>
+          <div class="form-group">
+            <label for="modalEmail">Email:</label>
+            <input id="modalEmail" [(ngModel)]="modalEmployee.email" name="modalEmail" required />
+          </div>
+          <div class="form-group">
+            <label for="modalPhone">Phone:</label>
+            <input id="modalPhone" [(ngModel)]="modalEmployee.phone" name="modalPhone" required />
+          </div>
+          <div class="form-group">
+            <label for="assignmentType">Assign To:</label>
+            <select id="assignmentType" [(ngModel)]="employeeAssignment.type" name="assignmentType" required class="form-select">
+              <option [ngValue]="null" disabled>Select Type</option>
+              <option value="zone">Zone</option>
+              <option value="region">Region</option>
+              <option value="secteur">Secteur</option>
+            </select>
+          </div>
+          <div class="form-group" *ngIf="employeeAssignment.type">
+            <label for="assignmentId">Select {{ employeeAssignment.type }}:</label>
+            <select id="assignmentId" [(ngModel)]="employeeAssignment.id" name="assignmentId" required class="form-select">
+              <ng-container [ngSwitch]="employeeAssignment.type">
+                <ng-template ngSwitchCase="zone">
+                  <option *ngFor="let zone of zones" [ngValue]="zone.id">{{ zone.name }}</option>
+                </ng-template>
+                <ng-template ngSwitchCase="region">
+                  <option *ngFor="let region of regions" [ngValue]="region.id">{{ region.name }}</option>
+                </ng-template>
+                <ng-template ngSwitchCase="secteur">
+                  <option *ngFor="let secteur of secteurs" [ngValue]="secteur.id">{{ secteur.name }}</option>
+                </ng-template>
+              </ng-container>
+            </select>
+          </div>
+          <div class="modal-actions">
+            <button type="submit" class="save-btn">Save</button>
+            <button type="button" (click)="closeModal()" class="cancel-btn">Cancel</button>
+          </div>
+        </form>
+      </div>
+    </div>
+    <!-- Add Zone Modal -->
+    <div *ngIf="isZoneModalOpen" class="modal-backdrop">
+      <div class="modal">
+        <h2>Add Zone</h2>
+        <form (ngSubmit)="saveZone()" #addZoneForm="ngForm" class="modal-form">
+          <div class="form-group">
+            <label for="zoneName">Zone Name:</label>
+            <input id="zoneName" [(ngModel)]="zoneForm.name" name="zoneName" required />
+          </div>
+          <div class="form-group">
+            <label for="chefZone">Chef Zone:</label>
+            <input id="chefZone" [(ngModel)]="zoneForm.chefZone" name="chefZone" required />
+          </div>
+          <div class="modal-actions">
+            <button type="submit" [disabled]="!addZoneForm.valid" class="save-btn">Save</button>
+            <button type="button" (click)="closeZoneModal()" class="cancel-btn">Cancel</button>
+          </div>
+        </form>
+      </div>
+    </div>
+    <!-- Add Region Modal -->
+    <div *ngIf="isRegionModalOpen" class="modal-backdrop">
+      <div class="modal">
+        <h2>Add Region</h2>
+        <form (ngSubmit)="saveRegion()" #addRegionForm="ngForm" class="modal-form">
+          <div class="form-group">
+            <label for="regionZone">Zone:</label>
+            <select id="regionZone" [(ngModel)]="regionForm.zoneId" name="regionZone" required class="form-select">
+              <option [ngValue]="null" disabled>Select a Zone</option>
+              <option *ngFor="let zone of zones" [value]="zone.id">{{ zone.name }}</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label for="regionName">Region Name:</label>
+            <input id="regionName" [(ngModel)]="regionForm.name" name="regionName" required />
+          </div>
+          <div class="form-group">
+            <label for="chefRegion">Region Head:</label>
+            <input id="chefRegion" [(ngModel)]="regionForm.chefRegion" name="chefRegion" required />
+          </div>
+          <div class="modal-actions">
+            <button type="submit" [disabled]="!addRegionForm.valid" class="save-btn">Save</button>
+            <button type="button" (click)="closeRegionModal()" class="cancel-btn">Cancel</button>
+          </div>
+        </form>
+      </div>
+    </div>
+    <!-- Add Secteur Modal -->
+    <div *ngIf="isSecteurModalOpen" class="modal-backdrop">
+      <div class="modal">
+        <h2>Add Secteur</h2>
+        <form (ngSubmit)="saveSecteur()" #addSecteurForm="ngForm" class="modal-form">
+          <div class="form-group">
+            <label for="secteurZone">Zone:</label>
+            <select id="secteurZone" [(ngModel)]="secteurForm.zoneId" name="secteurZone" required class="form-select" (change)="filterRegionsByZone()">
+              <option [ngValue]="null" disabled>Select a Zone</option>
+              <option *ngFor="let zone of zones" [ngValue]="zone.id">{{ zone.name }}</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label for="secteurRegion">Region:</label>
+            <select id="secteurRegion" [(ngModel)]="secteurForm.regionId" name="secteurRegion" required class="form-select">
+              <option [ngValue]="null" disabled>Select a Region</option>
+              <option *ngFor="let region of filteredRegions" [ngValue]="region.id">{{ region.name }}</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label for="secteurName">Secteur Name:</label>
+            <input id="secteurName" [(ngModel)]="secteurForm.name" name="secteurName" required />
+          </div>
+          <div class="form-group">
+            <label for="secteurHead">Secteur Head:</label>
+            <input id="secteurHead" [(ngModel)]="secteurForm.chefSecteur" name="secteurHead" required />
+          </div>
+          <div class="modal-actions">
+            <button type="submit" [disabled]="!addSecteurForm.valid" class="save-btn">Save</button>
+            <button type="button" (click)="closeSecteurModal()" class="cancel-btn">Cancel</button>
+          </div>
+        </form>
+      </div>
+    </div>
   `,
   styleUrls: ['./employee-management.component.css']
 })
@@ -344,7 +377,7 @@ export class EmployeeManagementComponent implements OnInit {
   employees: Employee[] = [];
   filteredEmployees: Employee[] = [];
   searchTerm: string = '';
-  activityLog: string[] = [];
+  activityLog: { timestamp: string, message: string }[] = [];
   zones: Zone[] = [];
   regions: Region[] = [];
   secteurs: Secteur[] = [];
@@ -367,6 +400,7 @@ export class EmployeeManagementComponent implements OnInit {
   filteredRegions: Region[] = [];
 
   employeeAssignment: Assignment = { type: null, id: null };
+  activeTab: 'employees' | 'zones' | 'regions' | 'secteurs' | 'logs' = 'employees';
 
   constructor(
     private employeeService: EmployeeService,
@@ -430,6 +464,7 @@ export class EmployeeManagementComponent implements OnInit {
         next: () => {
           this.fetchEmployees();
           this.showNotification('Employee updated successfully!', 'success');
+          this.addLog(`Updated employee: ${this.modalEmployee.name}`);
         },
         error: () => this.showNotification('Failed to update employee.', 'error')
       });
@@ -443,6 +478,7 @@ export class EmployeeManagementComponent implements OnInit {
         next: () => {
           this.fetchEmployees();
           this.showNotification('Employee added successfully!', 'success');
+          this.addLog(`Added employee: ${this.modalEmployee.name}`);
         },
         error: () => this.showNotification('Failed to add employee.', 'error')
       });
@@ -456,7 +492,7 @@ export class EmployeeManagementComponent implements OnInit {
         next: () => {
           this.fetchEmployees();
           this.showNotification('Employee deleted successfully!', 'success');
-          this.addActivity(`Employee ${employee.name} deleted at ${new Date().toLocaleTimeString()}`);
+          this.addLog(`Deleted employee: ${employee.name}`);
         },
         error: () => this.showNotification('Failed to delete employee.', 'error')
       });
@@ -503,6 +539,7 @@ export class EmployeeManagementComponent implements OnInit {
         this.showNotification('Region added successfully!', 'success');
         this.fetchRegions();
         this.closeRegionModal();
+        this.addLog(`Added region: ${this.regionForm.name}`);
       },
       error: (error) => {
         console.error(error);
@@ -519,6 +556,7 @@ export class EmployeeManagementComponent implements OnInit {
         this.closeZoneModal();
         // Optionally, you can refresh or update a list of zones here
         this.fetchZones();
+        this.addLog(`Added zone: ${this.zoneForm.name}`);
       },
       error: (error: any) => {
         console.error(error);
@@ -540,13 +578,6 @@ export class EmployeeManagementComponent implements OnInit {
     if (employee.region) return `Region: ${employee.region.name}`;
     if (employee.zone) return `Zone: ${employee.zone.name}`;
     return 'Unassigned';
-  }
-
-  addActivity(message: string) {
-    this.activityLog.unshift(message);
-    if (this.activityLog.length > 10) {
-      this.activityLog.pop();
-    }
   }
 
   fetchZones() {
@@ -605,6 +636,7 @@ export class EmployeeManagementComponent implements OnInit {
         this.showNotification('Secteur added successfully!', 'success');
         this.fetchSecteurs();
         this.closeSecteurModal();
+        this.addLog(`Added secteur: ${this.secteurForm.name}`);
       },
       error: (error) => {
         this.showNotification('Failed to add secteur.', 'error');
@@ -627,5 +659,15 @@ export class EmployeeManagementComponent implements OnInit {
   getZoneNameById(zoneId: number): string {
     const zone = this.zones.find(z => z.id === zoneId);
     return zone ? zone.name : 'N/A';
+  }
+
+  addLog(message: string) {
+    this.activityLog.unshift({
+      timestamp: new Date().toLocaleString(),
+      message
+    });
+    if (this.activityLog.length > 100) {
+      this.activityLog.pop();
+    }
   }
 } 

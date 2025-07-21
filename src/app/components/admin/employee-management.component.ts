@@ -2,6 +2,8 @@ import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { EmployeeService, Employee } from '../../services/employee.service';
+import { ZoneService, Zone } from '../../services/zone.service';
+import { RegionService, Region } from '../../services/region.service';
 
 @Component({
   selector: 'app-employee-management',
@@ -33,6 +35,14 @@ import { EmployeeService, Employee } from '../../services/employee.service';
             <span class="material-icons">person_add</span>
             Add Employee
           </button>
+          <button (click)="openAddZoneModal()" class="add-btn">
+            <span class="material-icons">add_location</span>
+            Add Zone
+          </button>
+          <button (click)="openAddRegionModal()" class="add-btn">
+            <span class="material-icons">public</span>
+            Add Region
+          </button>
         </div>
       </div>
       <!-- Modern horizontal summary bar -->
@@ -41,7 +51,7 @@ import { EmployeeService, Employee } from '../../services/employee.service';
           <!-- Region: Map Pin Icon -->
           <svg width="20" height="20" fill="none" viewBox="0 0 24 24" stroke="#d32f2f"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 21c-4.418 0-8-4.03-8-9a8 8 0 1 1 16 0c0 4.97-3.582 9-8 9zm0-7a2 2 0 1 0 0-4 2 2 0 0 0 0 4z"/></svg>
           <span class="summary-label">Region</span>
-          <span class="summary-count">{{ departementCounts['Region'] || 0 }}</span>
+          <span class="summary-count">{{ regions.length }}</span>
         </div>
         <div class="summary-card">
           <!-- Sector: Layers Icon -->
@@ -53,7 +63,7 @@ import { EmployeeService, Employee } from '../../services/employee.service';
           <!-- Zone: Globe Icon -->
           <svg width="20" height="20" fill="none" viewBox="0 0 24 24" stroke="#d32f2f"><circle cx="12" cy="12" r="10" stroke-width="2"/><path d="M2 12h20M12 2a15.3 15.3 0 0 1 0 20M12 2a15.3 15.3 0 0 0 0 20" stroke-width="2" stroke-linecap="round"/></svg>
           <span class="summary-label">Zone</span>
-          <span class="summary-count">{{ departementCounts['Zone'] || 0 }}</span>
+          <span class="summary-count">{{ zones.length }}</span>
         </div>
         <div class="summary-card">
           <!-- Shops: Storefront Icon -->
@@ -63,6 +73,7 @@ import { EmployeeService, Employee } from '../../services/employee.service';
         </div>
       </div>
       <div class="table-card">
+        <h3 class="employee-table-heading">Employee Table</h3>
         <table class="employee-table">
           <thead>
             <tr>
@@ -98,6 +109,54 @@ import { EmployeeService, Employee } from '../../services/employee.service';
             </tr>
             <tr *ngIf="filteredEmployees.length === 0">
               <td colspan="7" class="no-employees">No employees found.</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="table-card">
+        <h3 class="employee-table-heading">Zones Table</h3>
+        <table class="employee-table">
+          <thead>
+            <tr>
+              <th>ID</th>
+              <th>Zone Name</th>
+              <th>Chef Zone</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let zone of zones">
+              <td>{{ zone.id }}</td>
+              <td>{{ zone.name }}</td>
+              <td>{{ zone.chefZone }}</td>
+            </tr>
+            <tr *ngIf="zones.length === 0">
+              <td colspan="3" class="no-employees">No zones found.</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="table-card">
+        <h3 class="employee-table-heading">Regions Table</h3>
+        <table class="employee-table">
+          <thead>
+            <tr>
+              <th>ID</th>
+              <th>Region Name</th>
+              <th>Region Head</th>
+              <th>Zone</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let region of regions">
+              <td>{{ region.id }}</td>
+              <td>{{ region.name }}</td>
+              <td>{{ region.chefRegion }}</td>
+              <td>{{ getZoneName(region.zoneId) }}</td>
+            </tr>
+            <tr *ngIf="regions.length === 0">
+              <td colspan="4" class="no-employees">No regions found.</td>
             </tr>
           </tbody>
         </table>
@@ -150,6 +209,53 @@ import { EmployeeService, Employee } from '../../services/employee.service';
           </form>
         </div>
       </div>
+      <!-- Add Zone Modal -->
+      <div *ngIf="isZoneModalOpen" class="modal-backdrop">
+        <div class="modal">
+          <h2>Add Zone</h2>
+          <form (ngSubmit)="saveZone()" #addZoneForm="ngForm" class="modal-form">
+            <div class="form-group">
+              <label for="zoneName">Zone Name:</label>
+              <input id="zoneName" [(ngModel)]="zoneForm.name" name="zoneName" required />
+            </div>
+            <div class="form-group">
+              <label for="chefZone">Chef Zone:</label>
+              <input id="chefZone" [(ngModel)]="zoneForm.chefZone" name="chefZone" required />
+            </div>
+            <div class="modal-actions">
+              <button type="submit" [disabled]="!addZoneForm.valid" class="save-btn">Save</button>
+              <button type="button" (click)="closeZoneModal()" class="cancel-btn">Cancel</button>
+            </div>
+          </form>
+        </div>
+      </div>
+      <!-- Add Region Modal -->
+      <div *ngIf="isRegionModalOpen" class="modal-backdrop">
+        <div class="modal">
+          <h2>Add Region</h2>
+          <form (ngSubmit)="saveRegion()" #addRegionForm="ngForm" class="modal-form">
+            <div class="form-group">
+              <label for="regionZone">Zone:</label>
+              <select id="regionZone" [(ngModel)]="regionForm.zoneId" name="regionZone" required class="form-select">
+                <option [ngValue]="null" disabled>Select a Zone</option>
+                <option *ngFor="let zone of zones" [value]="zone.id">{{ zone.name }}</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label for="regionName">Region Name:</label>
+              <input id="regionName" [(ngModel)]="regionForm.name" name="regionName" required />
+            </div>
+            <div class="form-group">
+              <label for="chefRegion">Region Head:</label>
+              <input id="chefRegion" [(ngModel)]="regionForm.chefRegion" name="chefRegion" required />
+            </div>
+            <div class="modal-actions">
+              <button type="submit" [disabled]="!addRegionForm.valid" class="save-btn">Save</button>
+              <button type="button" (click)="closeRegionModal()" class="cancel-btn">Cancel</button>
+            </div>
+          </form>
+        </div>
+      </div>
     </div>
   `,
   styleUrls: ['./employee-management.component.css']
@@ -163,15 +269,31 @@ export class EmployeeManagementComponent implements OnInit {
   filteredEmployees: Employee[] = [];
   searchTerm: string = '';
   activityLog: string[] = [];
+  zones: Zone[] = [];
+  regions: Region[] = [];
 
   isModalOpen = false;
   editingEmployee: Employee | null = null;
   modalEmployee: Employee = this.emptyEmployee();
 
-  constructor(private employeeService: EmployeeService) {}
+  // Modal state for zone
+  isZoneModalOpen = false;
+  zoneForm: { name: string; chefZone: string } = { name: '', chefZone: '' };
+
+  // Modal state for region
+  isRegionModalOpen = false;
+  regionForm = { zoneId: null, name: '', chefRegion: '' };
+
+  constructor(
+    private employeeService: EmployeeService,
+    private zoneService: ZoneService,
+    private regionService: RegionService
+  ) {}
 
   ngOnInit() {
     this.fetchEmployees();
+    this.fetchZones();
+    this.fetchRegions();
   }
 
   showNotification(message: string, type: 'success' | 'error') {
@@ -259,6 +381,65 @@ export class EmployeeManagementComponent implements OnInit {
     this.editingEmployee = null;
   }
 
+  openAddZoneModal() {
+    this.zoneForm = { name: '', chefZone: '' };
+    this.isZoneModalOpen = true;
+  }
+
+  closeZoneModal() {
+    this.isZoneModalOpen = false;
+  }
+
+  openAddRegionModal() {
+    this.regionForm = { zoneId: null, name: '', chefRegion: '' };
+    this.isRegionModalOpen = true;
+  }
+
+  closeRegionModal() {
+    this.isRegionModalOpen = false;
+  }
+
+  saveRegion() {
+    if (!this.regionForm.zoneId) {
+      this.showNotification('Please select a zone.', 'error');
+      return;
+    }
+    const regionData = {
+      name: this.regionForm.name,
+      chefRegion: this.regionForm.chefRegion,
+      zoneId: this.regionForm.zoneId
+    };
+
+    this.regionService.addRegion(regionData).subscribe({
+      next: (response) => {
+        console.log(response);
+        this.showNotification('Region added successfully!', 'success');
+        this.fetchRegions();
+        this.closeRegionModal();
+      },
+      error: (error) => {
+        console.error(error);
+        this.showNotification('Failed to add region.', 'error');
+      }
+    });
+  }
+
+  saveZone() {
+    this.zoneService.addZone(this.zoneForm as Zone).subscribe({
+      next: (response: Zone) => {
+        console.log(response);
+        this.showNotification('Zone added successfully!', 'success');
+        this.closeZoneModal();
+        // Optionally, you can refresh or update a list of zones here
+        this.fetchZones();
+      },
+      error: (error: any) => {
+        console.error(error);
+        this.showNotification('Failed to add zone.', 'error');
+      },
+    });
+  }
+
   emptyEmployee(): Employee {
     return { id: undefined, name: '', email: '', phone: '', jobTitle: '', departement: '' };
   }
@@ -293,5 +474,24 @@ export class EmployeeManagementComponent implements OnInit {
     if (this.activityLog.length > 10) {
       this.activityLog.pop();
     }
+  }
+
+  fetchZones() {
+    this.zoneService.getAllZones().subscribe({
+      next: (zones) => this.zones = zones,
+      error: () => this.showNotification('Failed to load zones.', 'error')
+    });
+  }
+
+  fetchRegions() {
+    this.regionService.getAllRegions().subscribe({
+      next: (regions) => this.regions = regions,
+      error: () => this.showNotification('Failed to load regions.', 'error')
+    });
+  }
+
+  getZoneName(zoneId: number): string {
+    const zone = this.zones.find(z => z.id === zoneId);
+    return zone ? zone.name : 'N/A';
   }
 } 

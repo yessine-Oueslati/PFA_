@@ -4,6 +4,7 @@ import { FormsModule } from '@angular/forms';
 import { EmployeeService, Employee } from '../../services/employee.service';
 import { ZoneService, Zone } from '../../services/zone.service';
 import { RegionService, Region } from '../../services/region.service';
+import { SecteurService, Secteur } from '../../services/secteur.service';
 
 @Component({
   selector: 'app-employee-management',
@@ -43,6 +44,10 @@ import { RegionService, Region } from '../../services/region.service';
             <span class="material-icons">public</span>
             Add Region
           </button>
+          <button (click)="openAddSecteurModal()" class="add-btn">
+            <span class="material-icons">layers</span>
+            Add Secteur
+          </button>
         </div>
       </div>
       <!-- Modern horizontal summary bar -->
@@ -57,7 +62,7 @@ import { RegionService, Region } from '../../services/region.service';
           <!-- Sector: Layers Icon -->
           <svg width="20" height="20" fill="none" viewBox="0 0 24 24" stroke="#d32f2f"><polygon points="12 2 22 7 12 12 2 7 12 2" stroke-width="2" stroke-linejoin="round"/><polyline points="2 17 12 22 22 17" stroke-width="2" stroke-linejoin="round"/><polyline points="2 12 12 17 22 12" stroke-width="2" stroke-linejoin="round"/></svg>
           <span class="summary-label">Sector</span>
-          <span class="summary-count">{{ departementCounts['Sector'] || 0 }}</span>
+          <span class="summary-count">{{ secteurs.length }}</span>
         </div>
         <div class="summary-card">
           <!-- Zone: Globe Icon -->
@@ -153,7 +158,7 @@ import { RegionService, Region } from '../../services/region.service';
               <td>{{ region.id }}</td>
               <td>{{ region.name }}</td>
               <td>{{ region.chefRegion }}</td>
-              <td>{{ getZoneName(region.zoneId) }}</td>
+              <td>{{ getZoneName(region.zoneId ?? -1) }}</td>
             </tr>
             <tr *ngIf="regions.length === 0">
               <td colspan="4" class="no-employees">No regions found.</td>
@@ -256,6 +261,66 @@ import { RegionService, Region } from '../../services/region.service';
           </form>
         </div>
       </div>
+      <!-- Add Secteur Modal -->
+      <div *ngIf="isSecteurModalOpen" class="modal-backdrop">
+        <div class="modal">
+          <h2>Add Secteur</h2>
+          <form (ngSubmit)="saveSecteur()" #addSecteurForm="ngForm" class="modal-form">
+            <div class="form-group">
+              <label for="secteurZone">Zone:</label>
+              <select id="secteurZone" [(ngModel)]="secteurForm.zoneId" name="secteurZone" required class="form-select" (change)="filterRegionsByZone()">
+                <option [ngValue]="null" disabled>Select a Zone</option>
+                <option *ngFor="let zone of zones" [ngValue]="zone.id">{{ zone.name }}</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label for="secteurRegion">Region:</label>
+              <select id="secteurRegion" [(ngModel)]="secteurForm.regionId" name="secteurRegion" required class="form-select">
+                <option [ngValue]="null" disabled>Select a Region</option>
+                <option *ngFor="let region of filteredRegions" [ngValue]="region.id">{{ region.name }}</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label for="secteurName">Secteur Name:</label>
+              <input id="secteurName" [(ngModel)]="secteurForm.name" name="secteurName" required />
+            </div>
+            <div class="form-group">
+              <label for="secteurHead">Secteur Head:</label>
+              <input id="secteurHead" [(ngModel)]="secteurForm.chefSecteur" name="secteurHead" required />
+            </div>
+            <div class="modal-actions">
+              <button type="submit" [disabled]="!addSecteurForm.valid" class="save-btn">Save</button>
+              <button type="button" (click)="closeSecteurModal()" class="cancel-btn">Cancel</button>
+            </div>
+          </form>
+        </div>
+      </div>
+      <div class="table-card">
+        <h3 class="employee-table-heading">Secteurs Table</h3>
+        <table class="employee-table">
+          <thead>
+            <tr>
+              <th>ID</th>
+              <th>Secteur Name</th>
+              <th>Secteur Head</th>
+              <th>Region</th>
+              <th>Zone</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let secteur of secteurs">
+              <td>{{ secteur.id }}</td>
+              <td>{{ secteur.name }}</td>
+              <td>{{ secteur.chefSecteur }}</td>
+              <td>{{ getRegionName(secteur.regionId) }}</td>
+              <td>{{ getZoneNameById(secteur.zoneId) }}</td>
+            </tr>
+            <tr *ngIf="secteurs.length === 0">
+              <td colspan="5" class="no-employees">No secteurs found.</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
     </div>
   `,
   styleUrls: ['./employee-management.component.css']
@@ -271,6 +336,7 @@ export class EmployeeManagementComponent implements OnInit {
   activityLog: string[] = [];
   zones: Zone[] = [];
   regions: Region[] = [];
+  secteurs: Secteur[] = [];
 
   isModalOpen = false;
   editingEmployee: Employee | null = null;
@@ -284,16 +350,23 @@ export class EmployeeManagementComponent implements OnInit {
   isRegionModalOpen = false;
   regionForm = { zoneId: null, name: '', chefRegion: '' };
 
+  // Modal state for secteur
+  isSecteurModalOpen = false;
+  secteurForm = { zoneId: null, regionId: null, name: '', chefSecteur: '' };
+  filteredRegions: Region[] = [];
+
   constructor(
     private employeeService: EmployeeService,
     private zoneService: ZoneService,
-    private regionService: RegionService
+    private regionService: RegionService,
+    private secteurService: SecteurService
   ) {}
 
   ngOnInit() {
     this.fetchEmployees();
     this.fetchZones();
     this.fetchRegions();
+    this.fetchSecteurs();
   }
 
   showNotification(message: string, type: 'success' | 'error') {
@@ -485,12 +558,73 @@ export class EmployeeManagementComponent implements OnInit {
 
   fetchRegions() {
     this.regionService.getAllRegions().subscribe({
-      next: (regions) => this.regions = regions,
+      next: (regions) => {
+        // Map zone object to zoneId for each region
+        this.regions = regions.map(region => ({
+          ...region,
+          zoneId: region.zone?.id
+        }));
+      },
       error: () => this.showNotification('Failed to load regions.', 'error')
     });
   }
 
   getZoneName(zoneId: number): string {
+    const zone = this.zones.find(z => z.id === zoneId);
+    return zone ? zone.name : 'N/A';
+  }
+
+  openAddSecteurModal() {
+    this.secteurForm = { zoneId: null, regionId: null, name: '', chefSecteur: '' };
+    this.filteredRegions = [];
+    this.isSecteurModalOpen = true;
+  }
+
+  closeSecteurModal() {
+    this.isSecteurModalOpen = false;
+  }
+
+  filterRegionsByZone() {
+    this.filteredRegions = this.regions.filter(r => r.zoneId === this.secteurForm.zoneId);
+    this.secteurForm.regionId = null;
+  }
+
+  saveSecteur() {
+    if (!this.secteurForm.zoneId || !this.secteurForm.regionId) {
+      this.showNotification('Please select a zone and region.', 'error');
+      return;
+    }
+    const secteurData = {
+      name: this.secteurForm.name,
+      chefSecteur: this.secteurForm.chefSecteur,
+      regionId: this.secteurForm.regionId,
+      zoneId: this.secteurForm.zoneId
+    };
+    this.secteurService.addSecteur(secteurData).subscribe({
+      next: (response) => {
+        this.showNotification('Secteur added successfully!', 'success');
+        this.fetchSecteurs();
+        this.closeSecteurModal();
+      },
+      error: (error) => {
+        this.showNotification('Failed to add secteur.', 'error');
+      }
+    });
+  }
+
+  fetchSecteurs() {
+    this.secteurService.getAllSecteurs().subscribe({
+      next: (secteurs) => this.secteurs = secteurs,
+      error: () => this.showNotification('Failed to load secteurs.', 'error')
+    });
+  }
+
+  getRegionName(regionId: number): string {
+    const region = this.regions.find(r => r.id === regionId);
+    return region ? region.name : 'N/A';
+  }
+
+  getZoneNameById(zoneId: number): string {
     const zone = this.zones.find(z => z.id === zoneId);
     return zone ? zone.name : 'N/A';
   }

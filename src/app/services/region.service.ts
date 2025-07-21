@@ -1,12 +1,14 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
+import { map } from 'rxjs/operators';
 
 export interface Region {
   id?: number;
   name: string;
   chefRegion: string;
-  zoneId: number;
+  zoneId?: number;
+  zone?: { id: number; name: string; chefZone: string };
 }
 
 @Injectable({
@@ -25,6 +27,12 @@ export class RegionService {
   }
 
   public getAllRegions(): Observable<Region[]> {
-    return this.http.get<Region[]>(`${this.apiServerUrl}/all`);
+    return this.http.get<Region[]>(`${this.apiServerUrl}/all`).pipe(
+      // Map zone.id to zoneId for each region
+      map(regions => regions.map(region => ({
+        ...region,
+        zoneId: region.zone?.id
+      })))
+    );
   }
 } 

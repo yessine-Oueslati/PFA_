@@ -6,6 +6,11 @@ import { ZoneService, Zone } from '../../services/zone.service';
 import { RegionService, Region } from '../../services/region.service';
 import { SecteurService, Secteur } from '../../services/secteur.service';
 
+interface Assignment {
+  type: 'zone' | 'region' | 'secteur' | null;
+  id: number | null;
+}
+
 @Component({
   selector: 'app-employee-management',
   standalone: true,
@@ -53,6 +58,12 @@ import { SecteurService, Secteur } from '../../services/secteur.service';
       <!-- Modern horizontal summary bar -->
       <div class="summary-bar">
         <div class="summary-card">
+          <!-- Employees: People Icon -->
+          <span class="material-icons" style="font-size: 20px; color: #d32f2f;">people</span>
+          <span class="summary-label">Employees</span>
+          <span class="summary-count">{{ employees.length }}</span>
+        </div>
+        <div class="summary-card">
           <!-- Region: Map Pin Icon -->
           <svg width="20" height="20" fill="none" viewBox="0 0 24 24" stroke="#d32f2f"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 21c-4.418 0-8-4.03-8-9a8 8 0 1 1 16 0c0 4.97-3.582 9-8 9zm0-7a2 2 0 1 0 0-4 2 2 0 0 0 0 4z"/></svg>
           <span class="summary-label">Region</span>
@@ -86,8 +97,7 @@ import { SecteurService, Secteur } from '../../services/secteur.service';
               <th>Name</th>
               <th>Email</th>
               <th>Phone</th>
-              <th>Job Title</th>
-              <th>Departement</th>
+              <th>Assignment</th>
               <th>Actions</th>
             </tr>
           </thead>
@@ -97,12 +107,7 @@ import { SecteurService, Secteur } from '../../services/secteur.service';
               <td>{{ employee.name }}</td>
               <td>{{ employee.email }}</td>
               <td>{{ employee.phone }}</td>
-              <td>
-                <span [ngClass]="getJobTitleClass(employee.jobTitle)" class="job-title-badge">
-                  {{ employee.jobTitle }}
-                </span>
-              </td>
-              <td>{{ employee.departement }}</td>
+              <td>{{ getEmployeeAssignment(employee) }}</td>
               <td>
                 <button class="icon-btn edit-btn" (click)="editEmployee(employee)" title="Edit">
                   <span class="material-icons">edit</span>
@@ -113,7 +118,7 @@ import { SecteurService, Secteur } from '../../services/secteur.service';
               </td>
             </tr>
             <tr *ngIf="filteredEmployees.length === 0">
-              <td colspan="7" class="no-employees">No employees found.</td>
+              <td colspan="6" class="no-employees">No employees found.</td>
             </tr>
           </tbody>
         </table>
@@ -189,22 +194,28 @@ import { SecteurService, Secteur } from '../../services/secteur.service';
               <input id="modalPhone" [(ngModel)]="modalEmployee.phone" name="modalPhone" required />
             </div>
             <div class="form-group">
-              <label for="modalJobTitle">Job Title:</label>
-              <select id="modalJobTitle" [(ngModel)]="modalEmployee.jobTitle" name="modalJobTitle" required class="form-select">
-                <option value="">Select Job Title</option>
-                <option value="Chef Departement">Chef Departement</option>
-                <option value="Chef Zone">Chef Zone</option>
-                <option value="Chef Region">Chef Region</option>
+              <label for="assignmentType">Assign To:</label>
+              <select id="assignmentType" [(ngModel)]="employeeAssignment.type" name="assignmentType" required class="form-select">
+                <option [ngValue]="null" disabled>Select Type</option>
+                <option value="zone">Zone</option>
+                <option value="region">Region</option>
+                <option value="secteur">Secteur</option>
               </select>
             </div>
-            <div class="form-group">
-              <label for="modalDepartement">Departement:</label>
-              <select id="modalDepartement" [(ngModel)]="modalEmployee.departement" name="modalDepartement" required class="form-select">
-                <option value="">Select Departement</option>
-                <option value="Customer">Customer</option>
-                <option value="Region">Region</option>
-                <option value="Sector">Sector</option>
-                <option value="Zone">Zone</option>
+            <div class="form-group" *ngIf="employeeAssignment.type">
+              <label for="assignmentId">Select {{ employeeAssignment.type }}:</label>
+              <select id="assignmentId" [(ngModel)]="employeeAssignment.id" name="assignmentId" required class="form-select">
+                <ng-container [ngSwitch]="employeeAssignment.type">
+                  <ng-template ngSwitchCase="zone">
+                    <option *ngFor="let zone of zones" [ngValue]="zone.id">{{ zone.name }}</option>
+                  </ng-template>
+                  <ng-template ngSwitchCase="region">
+                    <option *ngFor="let region of regions" [ngValue]="region.id">{{ region.name }}</option>
+                  </ng-template>
+                  <ng-template ngSwitchCase="secteur">
+                    <option *ngFor="let secteur of secteurs" [ngValue]="secteur.id">{{ secteur.name }}</option>
+                  </ng-template>
+                </ng-container>
               </select>
             </div>
             <div class="modal-actions">
@@ -355,6 +366,8 @@ export class EmployeeManagementComponent implements OnInit {
   secteurForm = { zoneId: null, regionId: null, name: '', chefSecteur: '' };
   filteredRegions: Region[] = [];
 
+  employeeAssignment: Assignment = { type: null, id: null };
+
   constructor(
     private employeeService: EmployeeService,
     private zoneService: ZoneService,
@@ -392,48 +405,49 @@ export class EmployeeManagementComponent implements OnInit {
     const term = this.searchTerm.toLowerCase();
     this.filteredEmployees = this.employees.filter(emp =>
       emp.name.toLowerCase().includes(term) ||
-      emp.email.toLowerCase().includes(term) ||
-      emp.jobTitle.toLowerCase().includes(term) ||
-      emp.departement.toLowerCase().includes(term)
+      emp.email.toLowerCase().includes(term)
     );
   }
 
   openAddModal() {
     this.editingEmployee = null;
     this.modalEmployee = this.emptyEmployee();
+    this.employeeAssignment = { type: null, id: null };
     this.isModalOpen = true;
   }
 
   editEmployee(employee: Employee) {
     this.editingEmployee = { ...employee };
     this.modalEmployee = { ...employee };
+    this.employeeAssignment = { type: null, id: null };
     this.isModalOpen = true;
   }
 
   saveEmployee() {
     if (this.editingEmployee) {
-      // Update
+      // Update logic to be implemented
       this.employeeService.updateEmployee(this.modalEmployee).subscribe({
         next: () => {
-          this.isModalOpen = false;
           this.fetchEmployees();
           this.showNotification('Employee updated successfully!', 'success');
-          this.addActivity(`Employee ${this.modalEmployee.name} updated at ${new Date().toLocaleTimeString()}`);
         },
         error: () => this.showNotification('Failed to update employee.', 'error')
       });
     } else {
       // Add
-      this.employeeService.addEmployee(this.modalEmployee).subscribe({
+      if (!this.employeeAssignment.type || !this.employeeAssignment.id) {
+        this.showNotification('Please select an assignment.', 'error');
+        return;
+      }
+      this.employeeService.addEmployee(this.modalEmployee, this.employeeAssignment as { type: string, id: number }).subscribe({
         next: () => {
-          this.isModalOpen = false;
           this.fetchEmployees();
           this.showNotification('Employee added successfully!', 'success');
-          this.addActivity(`Employee ${this.modalEmployee.name} added at ${new Date().toLocaleTimeString()}`);
         },
         error: () => this.showNotification('Failed to add employee.', 'error')
       });
     }
+    this.closeModal();
   }
 
   deleteEmployee(employee: Employee) {
@@ -513,33 +527,19 @@ export class EmployeeManagementComponent implements OnInit {
     });
   }
 
-  emptyEmployee(): Employee {
-    return { id: undefined, name: '', email: '', phone: '', jobTitle: '', departement: '' };
+  emptyEmployee(): Omit<Employee, 'id'> {
+    return { name: '', email: '', phone: '' };
   }
 
   updateSummaryCounts() {
-    this.departementCounts = { Customer: 0, Region: 0, Sector: 0, Zone: 0 };
-    this.adminCount = 0;
-    for (const emp of this.employees) {
-      if (emp.departement && this.departementCounts.hasOwnProperty(emp.departement)) {
-        this.departementCounts[emp.departement]++;
-      }
-      // If you have a role property, count admins here. Placeholder:
-      if ((emp as any).role === 'ADMIN') this.adminCount++;
-    }
+    // This method may need to be updated or removed if it's no longer relevant
   }
 
-  getJobTitleClass(jobTitle: string): string {
-    switch (jobTitle) {
-      case 'Chef Departement':
-        return 'job-title-badge-chef-departement';
-      case 'Chef Zone':
-        return 'job-title-badge-chef-zone';
-      case 'Chef Region':
-        return 'job-title-badge-chef-region';
-      default:
-        return '';
-    }
+  getEmployeeAssignment(employee: Employee): string {
+    if (employee.secteur) return `Secteur: ${employee.secteur.name}`;
+    if (employee.region) return `Region: ${employee.region.name}`;
+    if (employee.zone) return `Zone: ${employee.zone.name}`;
+    return 'Unassigned';
   }
 
   addActivity(message: string) {

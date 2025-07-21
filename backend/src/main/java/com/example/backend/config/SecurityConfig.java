@@ -28,7 +28,7 @@ public class SecurityConfig {
         http
                 .csrf(AbstractHttpConfigurer::disable)
                 .authorizeHttpRequests(req ->
-                        req.requestMatchers("/api/v1/auth/**", "/api/employees/**", "/api/v1/zones/**", "/api/v1/regions/**", "/api/v1/secteurs/**")
+                        req.requestMatchers("/api/v1/auth/**", "/api/employees/**", "/api/v1/employees/**", "/api/v1/zones/**", "/api/v1/regions/**", "/api/v1/secteurs/**")
                                 .permitAll()
                                 .requestMatchers("/api/admin/**").hasAuthority("ADMIN")
                                 .anyRequest()

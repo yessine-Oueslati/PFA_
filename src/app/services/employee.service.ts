@@ -1,15 +1,18 @@
 import { Injectable } from '@angular/core';
-import { HttpClient } from '@angular/common/http';
+import { HttpClient, HttpParams } from '@angular/common/http';
 import { Observable } from 'rxjs';
+import { Zone } from './zone.service';
+import { Region } from './region.service';
+import { Secteur } from './secteur.service';
 
 export interface Employee {
   id?: number;
   name: string;
   email: string;
   phone: string;
-  jobTitle: string;
-  departement: string;
-  imageUrl?: string;
+  secteur?: Secteur;
+  region?: Region;
+  zone?: Zone;
 }
 
 @Injectable({ providedIn: 'root' })
@@ -26,8 +29,14 @@ export class EmployeeService {
     return this.http.get<Employee>(`${this.apiUrl}/find/${id}`);
   }
 
-  addEmployee(employee: Employee): Observable<Employee> {
-    return this.http.post<Employee>(`${this.apiUrl}/add`, employee);
+
+  addEmployee(employee: Omit<Employee, 'id'>, assignment: { type: string, id: number }): Observable<Employee> {
+    let params = new HttpParams();
+    if (assignment.type === 'zone') params = params.set('zoneId', assignment.id.toString());
+    if (assignment.type === 'region') params = params.set('regionId', assignment.id.toString());
+    if (assignment.type === 'secteur') params = params.set('secteurId', assignment.id.toString());
+
+    return this.http.post<Employee>(`${this.apiUrl}/add`, employee, { params });
   }
 
   updateEmployee(employee: Employee): Observable<Employee> {
